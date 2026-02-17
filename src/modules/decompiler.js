@@ -1,6 +1,7 @@
 const fs = require('fs-extra');
 const os = require('os');
-const { platform, performance } = require('./index');
+const platform = require('./platform');
+const performance = require('./performance');
 const { js, css, html } = require('js-beautify');
 
 class Decompiler {

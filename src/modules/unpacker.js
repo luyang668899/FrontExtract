@@ -1,5 +1,6 @@
 const path = require('path');
-const { platform, performance } = require('./index');
+const platform = require('./platform');
+const performance = require('./performance');
 const AdmZip = require('adm-zip');
 const extractZip = require('extract-zip');
 const { execSync } = require('child_process');

@@ -1,10 +1,9 @@
 const os = require('os');
-const { logger } = require('./index');
+const logger = require('./logger');
 const fs = require('fs-extra');
 const path = require('path');
 const { execSync } = require('child_process');
-const platformModule = require('./platform');
-const platform = platformModule.platform;
+const platform = require('./platform');
 
 class ResourceMonitor {
   constructor() {
@@ -209,8 +208,9 @@ class ResourceMonitor {
     const availableMemory = resourceUsage.memory.free;
     const hasEnoughMemory = availableMemory > requiredMemory;
 
+    // 即使有警告，只要有足够的实际可用内存，就允许操作继续
     return {
-      hasEnoughResources: alerts.length === 0 && hasEnoughMemory,
+      hasEnoughResources: hasEnoughMemory,
       resourceUsage,
       alerts,
       memoryCheck: {

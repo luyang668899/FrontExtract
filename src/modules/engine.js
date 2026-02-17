@@ -4,15 +4,13 @@
  * 包括文件解包、前端资源扫描、资源重组、前端包生成等步骤
  */
 
-const { 
-  platform, 
-  Unpacker, 
-  Decompiler, 
-  Packer, 
-  logger, 
-  performance, 
-  resourceMonitor 
-} = require('.');
+const platform = require('./platform');
+const Unpacker = require('./unpacker');
+const Decompiler = require('./decompiler');
+const Packer = require('./packer');
+const logger = require('./logger');
+const performance = require('./performance');
+const resourceMonitor = require('./resourceMonitor');
 const fs = require('fs-extra');
 
 class Engine {

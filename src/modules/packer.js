@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { platform } = require('./index');
+const platform = require('./platform');
 const AdmZip = require('adm-zip');
 
 class Packer {
