@@ -5,6 +5,21 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fan - 跨平台软件前端反编译提取工具</title>
+    <!-- 液态效果SVG滤镜 -->
+    <svg width="0" height="0" style="position:absolute;">
+      <defs>
+        <!-- 液态效果滤镜 -->
+        <filter id="liquid-effect">
+          <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" seed="1"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        </filter>
+        <!-- 液态波纹滤镜 -->
+        <filter id="liquid-ripple">
+          <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="2" result="noise"></feTurbulence>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+        </filter>
+      </defs>
+    </svg>
     <style>
       * {
         margin: 0;
@@ -18,6 +33,39 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 40% 40%, rgba(100, 108, 255, 0.05) 0%, transparent 50%);
+        animation: liquidBackground 15s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      @keyframes liquidBackground {
+        0%, 100% {
+          transform: translateX(0) translateY(0);
+        }
+        25% {
+          transform: translateX(2%) translateY(2%);
+        }
+        50% {
+          transform: translateX(0) translateY(4%);
+        }
+        75% {
+          transform: translateX(-2%) translateY(2%);
+        }
       }
 
       header {
@@ -41,6 +89,8 @@
         align-items: center;
         justify-content: center;
         padding: 40px;
+        position: relative;
+        z-index: 1;
       }
 
       .drag-area {
@@ -56,16 +106,60 @@
         backdrop-filter: blur(10px);
         transition: all 0.3s ease;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        will-change: transform, box-shadow;
+        transform: translateZ(0);
+      }
+
+      .drag-area::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.05) 50%,
+          transparent 100%
+        );
+        transform: rotate(45deg);
+        animation: liquidDrag 6s linear infinite;
+        pointer-events: none;
+        z-index: -1;
       }
 
       .drag-area:hover {
         border-color: rgba(255, 255, 255, 0.8);
         background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 30px rgba(100, 108, 255, 0.3);
       }
 
       .drag-area.drag-active {
         border-color: #4CAF50;
         background: rgba(76, 175, 80, 0.1);
+        animation: liquidPulse 1s ease-in-out infinite;
+      }
+
+      @keyframes liquidDrag {
+        0% {
+          transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+          transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+      }
+
+      @keyframes liquidPulse {
+        0%, 100% {
+          box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(76, 175, 80, 0.5);
+        }
       }
 
       .drag-area-icon {
@@ -84,6 +178,76 @@
       .drag-area-small-text {
         color: rgba(255, 255, 255, 0.7);
         font-size: 14px;
+      }
+
+      .liquid-button {
+        position: relative;
+        border: none;
+        border-radius: 12px;
+        padding: 0.8em 1.5em;
+        font-size: 1em;
+        font-weight: 600;
+        font-family: inherit;
+        background: linear-gradient(135deg, rgba(100, 108, 255, 0.8), rgba(83, 91, 242, 0.9));
+        color: white;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(100, 108, 255, 0.3);
+        will-change: transform, box-shadow;
+        transform: translateZ(0);
+      }
+
+      .liquid-button::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0) 50%,
+          rgba(255, 255, 255, 0.2) 100%
+        );
+        transform: rotate(45deg);
+        animation: liquidFlow 3s linear infinite;
+        pointer-events: none;
+      }
+
+      .liquid-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(100, 108, 255, 0.4);
+        filter: brightness(1.05);
+      }
+
+      .liquid-button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 15px rgba(100, 108, 255, 0.3);
+        animation: liquidRipple 0.6s ease-out;
+      }
+
+      /* 液态流动动画 */
+      @keyframes liquidFlow {
+        0% {
+          transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+          transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+      }
+
+      /* 液态波纹动画 */
+      @keyframes liquidRipple {
+        0%, 100% {
+          filter: url(#liquid-ripple);
+          transform: scale(1);
+        }
+        50% {
+          filter: url(#liquid-ripple);
+          transform: scale(1.05);
+        }
       }
 
       .upload-btn {
@@ -163,19 +327,51 @@
       }
 
       .result-btn {
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 8px;
-        padding: 12px 24px;
+        position: relative;
+        border: none;
+        border-radius: 12px;
+        padding: 0.8em 1.5em;
+        font-size: 1em;
+        font-weight: 600;
+        font-family: inherit;
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(69, 160, 73, 0.9));
         color: white;
-        font-size: 16px;
         cursor: pointer;
+        overflow: hidden;
         transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+        will-change: transform, box-shadow;
+        transform: translateZ(0);
+      }
+
+      .result-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          to bottom right,
+          rgba(255, 255, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0) 50%,
+          rgba(255, 255, 255, 0.2) 100%
+        );
+        transform: rotate(45deg);
+        animation: liquidFlow 3s linear infinite;
+        pointer-events: none;
       }
 
       .result-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(76, 175, 80, 0.4);
+        filter: brightness(1.05);
+      }
+
+      .result-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 15px rgba(76, 175, 80, 0.3);
+        animation: liquidRipple 0.6s ease-out;
       }
 
       .error-message {
@@ -197,6 +393,42 @@
         font-size: 14px;
       }
 
+      /* 性能优化：减少动画复杂度 */
+      @media (prefers-reduced-motion: reduce) {
+        .liquid-button::before {
+          animation: none;
+        }
+        .result-btn::before {
+          animation: none;
+        }
+        .drag-area::before {
+          animation: none;
+        }
+        body::before {
+          animation: none;
+        }
+        .drag-area.drag-active {
+          animation: none;
+          box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+        }
+      }
+
+      /* 低性能设备降级 */
+      @media (max-width: 768px) {
+        .liquid-button::before {
+          animation-duration: 6s; /* 减慢动画速度 */
+        }
+        .result-btn::before {
+          animation-duration: 6s; /* 减慢动画速度 */
+        }
+        .drag-area::before {
+          animation-duration: 10s; /* 减慢动画速度 */
+        }
+        body::before {
+          animation-duration: 20s; /* 减慢动画速度 */
+        }
+      }
+
       @media (max-width: 900px) {
         .drag-area,
         .progress-container,
@@ -216,6 +448,42 @@
         .drag-area-text {
           font-size: 16px;
         }
+        
+        /* 响应式调整按钮大小 */
+        .liquid-button {
+          padding: 0.6em 1.2em;
+          font-size: 0.9em;
+        }
+        
+        .result-btn {
+          padding: 0.6em 1.2em;
+          font-size: 0.9em;
+        }
+      }
+
+      /* 极小屏幕进一步优化 */
+      @media (max-width: 480px) {
+        .liquid-button {
+          padding: 0.5em 1em;
+          font-size: 0.8em;
+        }
+        
+        .result-btn {
+          padding: 0.5em 1em;
+          font-size: 0.8em;
+        }
+        
+        .drag-area {
+          height: 250px;
+        }
+        
+        .drag-area-icon {
+          font-size: 50px;
+        }
+        
+        .drag-area-text {
+          font-size: 14px;
+        }
       }
     </style>
   </head>
@@ -231,9 +499,9 @@
         <div class="drag-area-small-text">支持 Electron 安装包、压缩包、前端编译包等格式</div>
       </div>
       <div style="margin-top: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <button class="upload-btn" id="uploadBtn">选择文件</button>
-        <button class="upload-btn" id="outputPathBtn">选择输出路径</button>
-        <button class="upload-btn" id="checkPermissionBtn">检查权限</button>
+        <button class="liquid-button" id="uploadBtn">选择文件</button>
+        <button class="liquid-button" id="outputPathBtn">选择输出路径</button>
+        <button class="liquid-button" id="checkPermissionBtn">检查权限</button>
         <span id="currentOutputPath" style="color: white; font-size: 14px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">默认路径: 下载文件夹/fan-output</span>
       </div>
 
@@ -244,8 +512,8 @@
           <h4 style="margin-bottom: 10px;">路径权限检测</h4>
           <div style="display: flex; gap: 10px; margin-bottom: 10px;">
             <input type="text" id="permissionPathInput" placeholder="输入路径或使用默认路径" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); color: white;">
-            <button class="upload-btn" id="detectPermissionBtn" style="padding: 10px 20px;">检测权限</button>
-            <button class="upload-btn" id="useRecommendedPathBtn" style="padding: 10px 20px;">使用推荐路径</button>
+            <button class="liquid-button" id="detectPermissionBtn" style="padding: 10px 20px;">检测权限</button>
+            <button class="liquid-button" id="useRecommendedPathBtn" style="padding: 10px 20px;">使用推荐路径</button>
           </div>
         </div>
 
@@ -265,8 +533,8 @@
         </div>
 
         <div class="permission-actions" style="display: flex; justify-content: center; gap: 20px;">
-          <button class="upload-btn" id="applyPermissionBtn" style="padding: 12px 24px;">应用修复</button>
-          <button class="upload-btn" id="closePermissionBtn" style="padding: 12px 24px;">关闭</button>
+          <button class="liquid-button" id="applyPermissionBtn" style="padding: 12px 24px;">应用修复</button>
+          <button class="liquid-button" id="closePermissionBtn" style="padding: 12px 24px;">关闭</button>
         </div>
       </div>
 
